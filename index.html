@@ -6,290 +6,157 @@
 <title>AIML Branch — Lunch Count 🍽️</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  :root{
-    --text:#f1f5f9;
-    --muted:#94a3b8;
-    --green:#22c55e;
-    --red:#ef4444;
-    --gold:#f59e0b;
-    --orange:#f97316;
-  }
-  body{
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
-    min-height:100vh;
-    color:var(--text);
-    padding: 20px 16px 40px;
-  }
+  :root{ --text:#f1f5f9; --muted:#94a3b8; --green:#22c55e; --red:#ef4444; --gold:#f59e0b; --orange:#f97316; }
+  body{ font-family:'Segoe UI', system-ui, -apple-system, sans-serif; background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%); min-height:100vh; color:var(--text); padding:20px 16px 40px; }
   .container{ max-width:1100px; margin:0 auto; }
-
-  .header{
-    text-align:center;
-    padding: 28px 20px 22px;
-    background: rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.1);
-    border-radius:20px;
-    backdrop-filter: blur(10px);
-    margin-bottom:18px;
-    animation: slideDown .5s ease;
-  }
-  .header .badge{
-    display:inline-block;
-    background: linear-gradient(90deg,#6366f1,#8b5cf6);
-    color:white;
-    font-size:12px;
-    font-weight:700;
-    letter-spacing:2px;
-    padding:6px 16px;
-    border-radius:20px;
-    text-transform:uppercase;
-    margin-bottom:12px;
-  }
-  .header h1{
-    font-size: clamp(26px, 5vw, 40px);
-    font-weight:800;
-    background: linear-gradient(90deg,#fff,#a5b4fc);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    background-clip:text;
-  }
+  .header{ text-align:center; padding:28px 20px 22px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:20px; backdrop-filter:blur(10px); margin-bottom:18px; animation:slideDown .5s ease; }
+  .header .badge{ display:inline-block; background:linear-gradient(90deg,#6366f1,#8b5cf6); color:white; font-size:12px; font-weight:700; letter-spacing:2px; padding:6px 16px; border-radius:20px; text-transform:uppercase; margin-bottom:12px; }
+  .header h1{ font-size:clamp(26px,5vw,40px); font-weight:800; background:linear-gradient(90deg,#fff,#a5b4fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
   .header p{ color:var(--muted); margin-top:8px; font-size:14px; }
   .header p b{ color:#c7d2fe; }
-  .hint{
-    margin-top:10px; font-size:13px; background:rgba(255,255,255,0.08);
-    display:inline-block; padding:8px 14px; border-radius:20px;
-    border:1px solid rgba(255,255,255,0.12); color:#e2e8f0;
-  }
+  .hint{ margin-top:10px; font-size:13px; background:rgba(255,255,255,0.08); display:inline-block; padding:8px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.12); color:#e2e8f0; line-height:1.5; }
 
-  .stats{
-    display:grid;
-    grid-template-columns: repeat(3,1fr);
-    gap:12px;
-    margin-bottom:12px;
-  }
-  .pay-stats{
-    display:grid;
-    grid-template-columns: repeat(3,1fr);
-    gap:12px;
-    margin-bottom:18px;
-  }
-  .stat{
-    background: rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.1);
-    border-radius:16px;
-    padding:16px;
-    text-align:center;
-    transition: transform .2s;
-  }
-  .stat:hover{ transform: translateY(-2px); }
+  .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:12px; }
+  .pay-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px; }
+  .stat{ background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:16px; text-align:center; transition:transform .2s; }
+  .stat:hover{ transform:translateY(-2px); }
   .stat .num{ font-size:32px; font-weight:800; line-height:1; }
   .stat .label{ font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-top:6px; font-weight:600; }
-  .stat.green .num{ color:var(--green); }
-  .stat.red .num{ color:var(--red); }
-  .stat.white .num{ color:white; }
-  .stat.gold .num{ color:var(--gold); }
-  .stat.orange .num{ color:var(--orange); }
+  .stat.green .num{ color:var(--green); } .stat.red .num{ color:var(--red); } .stat.white .num{ color:white; }
+  .stat.gold .num{ color:var(--gold); } .stat.orange .num{ color:var(--orange); }
   .stat.amount-box{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; }
   .stat.amount-box label{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); font-weight:700; }
-  .stat.amount-box input{
-    width:110px; text-align:center; background:rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.15); border-radius:10px;
-    color:white; font-size:18px; font-weight:800; padding:8px;
-    outline:none;
-  }
+  .stat.amount-box input{ width:110px; text-align:center; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:10px; color:white; font-size:18px; font-weight:800; padding:8px; outline:none; }
   .stat.amount-box input:focus{ border-color:var(--gold); }
   .stat.amount-box .amt-text{ font-size:12px; color:#fde68a; font-weight:700; line-height:1.4; }
 
-  .progress-wrap{
-    background: rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.1);
-    border-radius:16px;
-    padding:14px 16px;
-    margin-bottom:12px;
-  }
+  .progress-wrap{ background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:14px 16px; margin-bottom:12px; }
   .progress-wrap .top{ display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-bottom:8px; font-weight:600; }
   .progress-bar{ height:10px; background:#1e293b; border-radius:10px; overflow:hidden; display:flex; }
-  .progress-bar .fill-green{ background: linear-gradient(90deg,#22c55e,#4ade80); height:100%; width:0%; transition: width .5s cubic-bezier(.4,0,.2,1); }
-  .progress-bar .fill-red{ background: linear-gradient(90deg,#ef4444,#f87171); height:100%; width:0%; transition: width .5s cubic-bezier(.4,0,.2,1); }
-  .progress-bar .fill-gold{ background: linear-gradient(90deg,#f59e0b,#fbbf24); height:100%; width:0%; transition: width .5s cubic-bezier(.4,0,.2,1); }
+  .fill-green{ background:linear-gradient(90deg,#22c55e,#4ade80); height:100%; width:0%; transition:width .5s; }
+  .fill-red{ background:linear-gradient(90deg,#ef4444,#f87171); height:100%; width:0%; transition:width .5s; }
+  .fill-gold{ background:linear-gradient(90deg,#f59e0b,#fbbf24); height:100%; width:0%; transition:width .5s; }
 
-  .controls{
-    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
-    margin-bottom:18px;
-  }
-  .search{
-    flex:1; min-width:200px;
-    display:flex; align-items:center; gap:8px;
-    background: rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.12);
-    border-radius:12px;
-    padding:10px 14px;
-  }
-  .search input{
-    background:none; border:none; outline:none; color:white; font-size:15px; width:100%;
-  }
+  .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px; }
+  .search{ flex:1; min-width:200px; display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:10px 14px; }
+  .search input{ background:none; border:none; outline:none; color:white; font-size:15px; width:100%; }
   .search input::placeholder{ color:#64748b; }
-  .btn{
-    border:none; cursor:pointer; font-weight:700; font-size:13px;
-    padding:10px 16px; border-radius:12px; transition: all .2s;
-    letter-spacing:.3px;
+  .btn{ border:none; cursor:pointer; font-weight:700; font-size:13px; padding:10px 16px; border-radius:12px; transition:all .2s; letter-spacing:.3px; }
+  .btn:active{ transform:scale(.96); }
+  .btn-all-yes{ background:linear-gradient(135deg,#22c55e,#16a34a); color:white; }
+  .btn-all-no{ background:linear-gradient(135deg,#ef4444,#dc2626); color:white; }
+  .btn-add{ background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white; }
+  .btn-fixall{ background:#334155; color:#e2e8f0; border:1px solid rgba(255,255,255,.15); }
+  .btn-fixall:hover{ background:#475569; }
+
+  /* Add member form */
+  .add-form{
+    display:none; background:rgba(99,102,241,0.12); border:1.5px dashed rgba(99,102,241,0.6);
+    border-radius:16px; padding:16px; margin-bottom:18px;
   }
-  .btn:active{ transform: scale(.96); }
-  .btn-all-yes{ background: linear-gradient(135deg,#22c55e,#16a34a); color:white; }
-  .btn-all-yes:hover{ filter:brightness(1.1); }
-  .btn-all-no{ background: linear-gradient(135deg,#ef4444,#dc2626); color:white; }
-  .btn-all-no:hover{ filter:brightness(1.1); }
+  .add-form.open{ display:block; animation:fadeIn .3s ease; }
+  .add-form h3{ font-size:15px; margin-bottom:10px; }
+  .add-form .row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .add-form input{
+    flex:1; min-width:200px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+    border-radius:12px; padding:11px 14px; color:white; font-size:15px; font-weight:700; letter-spacing:.5px;
+    font-family:'Courier New', monospace; outline:none; text-transform:uppercase;
+  }
+  .add-form input:focus{ border-color:#818cf8; }
+  .add-form .note{ font-size:12px; color:var(--muted); margin-top:8px; }
+  .btn-add-confirm{ background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white; }
+  .btn-cancel{ background:#334155; color:#e2e8f0; }
 
   .filters{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
-  .filter-btn{
-    background: rgba(255,255,255,0.07); color:var(--muted);
-    border:1px solid rgba(255,255,255,0.12);
-    padding:8px 16px; border-radius:20px; cursor:pointer; font-size:13px; font-weight:600;
-    transition: all .2s;
-  }
+  .filter-btn{ background:rgba(255,255,255,0.07); color:var(--muted); border:1px solid rgba(255,255,255,0.12); padding:8px 16px; border-radius:20px; cursor:pointer; font-size:13px; font-weight:600; transition:all .2s; }
   .filter-btn.active{ background:#6366f1; color:white; border-color:#6366f1; }
-  .filter-btn:hover{ background: rgba(255,255,255,0.14); }
+  .filter-btn:hover{ background:rgba(255,255,255,0.14); }
   .filter-btn.active:hover{ background:#6366f1; }
 
-  .grid{
-    display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap:14px;
-  }
-  .card{
-    background: #1e293b;
-    border:2px solid rgba(255,255,255,0.08);
-    border-radius:16px;
-    padding:16px;
-    transition: all .35s cubic-bezier(.4,0,.2,1);
-    animation: fadeIn .4s ease both;
-    position:relative;
-    overflow:hidden;
-  }
-  .card:hover{ transform: translateY(-3px); border-color: rgba(255,255,255,0.2); box-shadow: 0 10px 25px rgba(0,0,0,.3); }
-
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+  .card{ background:#1e293b; border:2px solid rgba(255,255,255,0.08); border-radius:16px; padding:16px; transition:all .35s; animation:fadeIn .4s ease both; position:relative; overflow:hidden; }
+  .card:hover{ transform:translateY(-3px); border-color:rgba(255,255,255,0.2); box-shadow:0 10px 25px rgba(0,0,0,.3); }
   .card-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
   .card .left{ display:flex; align-items:center; gap:12px; min-width:0; }
-  .avatar{
-    width:44px; height:44px; border-radius:12px; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-    font-weight:800; font-size:14px;
-    background: linear-gradient(135deg,#6366f1,#8b5cf6);
-    color:white;
-    transition: all .3s;
-    position:relative;
-  }
-  .avatar .pay-dot{
-    position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%;
-    background:#f59e0b; color:white; font-size:11px; font-weight:900;
-    display:none; align-items:center; justify-content:center;
-    border:2px solid #1e293b;
-  }
+  .avatar{ width:44px; height:44px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white; transition:all .3s; position:relative; }
+  .avatar .pay-dot{ position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:#f59e0b; color:white; font-size:11px; font-weight:900; display:none; align-items:center; justify-content:center; border:2px solid #1e293b; }
   .card.is-paid .avatar .pay-dot{ display:flex; }
   .card .info{ min-width:0; }
-  .card .roll{
-    font-weight:800; font-size:15px; letter-spacing:.5px;
-    font-family: 'Courier New', monospace;
-    white-space:nowrap;
-  }
+  .card .roll{ font-weight:800; font-size:15px; letter-spacing:.5px; font-family:'Courier New', monospace; white-space:nowrap; }
   .card .sub{ font-size:12px; color:var(--muted); margin-top:2px; }
-  .le-badge{
-    display:inline-block; background: linear-gradient(135deg,#f59e0b,#f97316); color:white;
-    font-size:10px; font-weight:800; letter-spacing:.5px; padding:2px 7px; border-radius:20px;
-    margin-left:8px; vertical-align:middle; font-family:'Segoe UI', sans-serif;
-  }
-  .card .status-icon{
-    position:absolute; top:10px; right:12px;
-    font-size:18px; font-weight:900;
-    opacity:0; transform: scale(0);
-    transition: all .3s cubic-bezier(.68,-0.55,.27,1.55);
-  }
+  .le-badge{ display:inline-block; background:linear-gradient(135deg,#f59e0b,#f97316); color:white; font-size:10px; font-weight:800; letter-spacing:.5px; padding:2px 7px; border-radius:20px; margin-left:8px; vertical-align:middle; font-family:'Segoe UI',sans-serif; }
+  .fixed-badge{ display:inline-block; background:#0f172a; color:#fbbf24; font-size:10px; font-weight:800; padding:2px 7px; border-radius:20px; margin-left:6px; border:1px solid #f59e0b; vertical-align:middle; }
+  .card .status-icon{ position:absolute; top:10px; right:12px; font-size:18px; font-weight:900; opacity:0; transform:scale(0); transition:all .3s; }
 
   .actions{ display:flex; gap:8px; flex-shrink:0; }
-  .yes-btn, .no-btn{
-    width:48px; height:42px; border-radius:12px; border:none; cursor:pointer;
-    font-weight:800; font-size:13px; letter-spacing:.5px;
-    transition: all .2s cubic-bezier(.4,0,.2,1);
-    display:flex; align-items:center; justify-content:center;
-  }
-  .yes-btn{ background: rgba(34,197,94,0.15); color:#4ade80; border:1.5px solid rgba(34,197,94,0.4); }
-  .yes-btn:hover{ background:#22c55e; color:white; transform: scale(1.08); box-shadow:0 4px 15px rgba(34,197,94,.4); }
-  .no-btn{ background: rgba(239,68,68,0.15); color:#f87171; border:1.5px solid rgba(239,68,68,0.4); }
-  .no-btn:hover{ background:#ef4444; color:white; transform: scale(1.08); box-shadow:0 4px 15px rgba(239,68,68,.4); }
-  .yes-btn:active, .no-btn:active{ transform: scale(.92); }
+  .yes-btn,.no-btn{ width:48px; height:42px; border-radius:12px; border:none; cursor:pointer; font-weight:800; font-size:13px; letter-spacing:.5px; transition:all .2s; display:flex; align-items:center; justify-content:center; }
+  .yes-btn{ background:rgba(34,197,94,0.15); color:#4ade80; border:1.5px solid rgba(34,197,94,0.4); }
+  .yes-btn:hover{ background:#22c55e; color:white; transform:scale(1.08); box-shadow:0 4px 15px rgba(34,197,94,.4); }
+  .no-btn{ background:rgba(239,68,68,0.15); color:#f87171; border:1.5px solid rgba(239,68,68,0.4); }
+  .no-btn:hover{ background:#ef4444; color:white; transform:scale(1.08); box-shadow:0 4px 15px rgba(239,68,68,.4); }
+  .yes-btn:active,.no-btn:active{ transform:scale(.92); }
+  .yes-btn:disabled,.no-btn:disabled,.paid-btn:disabled,.notpaid-btn:disabled{ opacity:.35 !important; cursor:not-allowed !important; transform:none !important; box-shadow:none !important; }
 
-  /* Money row */
-  .pay-row{
-    display:flex; align-items:center; justify-content:space-between; gap:8px;
-    margin-top:14px; padding-top:12px;
-    border-top:1px dashed rgba(255,255,255,0.15);
-  }
+  .pay-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:14px; padding-top:12px; border-top:1px dashed rgba(255,255,255,0.15); }
   .pay-label{ font-size:12px; font-weight:700; color:var(--muted); letter-spacing:.5px; white-space:nowrap; }
   .pay-label b{ color:#fbbf24; }
   .pay-actions{ display:flex; gap:6px; }
-  .paid-btn, .notpaid-btn{
-    padding:8px 13px; border-radius:10px; font-size:12px; font-weight:800;
-    cursor:pointer; border:1.5px solid; transition: all .2s; letter-spacing:.3px;
-  }
-  .paid-btn{ background: rgba(245,158,11,0.15); color:#fbbf24; border-color: rgba(245,158,11,0.5); }
-  .paid-btn:hover{ background:#f59e0b; color:white; transform: scale(1.06); box-shadow:0 4px 14px rgba(245,158,11,.4); }
-  .notpaid-btn{ background: rgba(148,163,184,0.12); color:#cbd5e1; border-color: rgba(148,163,184,0.4); }
-  .notpaid-btn:hover{ background:#64748b; color:white; transform: scale(1.06); }
-  .paid-btn:active, .notpaid-btn:active{ transform: scale(.94); }
-
+  .paid-btn,.notpaid-btn{ padding:8px 13px; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; border:1.5px solid; transition:all .2s; letter-spacing:.3px; }
+  .paid-btn{ background:rgba(245,158,11,0.15); color:#fbbf24; border-color:rgba(245,158,11,0.5); }
+  .paid-btn:hover{ background:#f59e0b; color:white; transform:scale(1.06); box-shadow:0 4px 14px rgba(245,158,11,.4); }
+  .notpaid-btn{ background:rgba(148,163,184,0.12); color:#cbd5e1; border-color:rgba(148,163,184,0.4); }
+  .notpaid-btn:hover{ background:#64748b; color:white; transform:scale(1.06); }
+  .paid-btn:active,.notpaid-btn:active{ transform:scale(.94); }
   .card.is-paid .paid-btn{ background:#f59e0b; color:white; border-color:#f59e0b; box-shadow:0 0 12px rgba(245,158,11,.55); }
   .card.is-paid .notpaid-btn{ opacity:.55; }
   .card.is-notpaid .notpaid-btn{ background:#f97316; color:white; border-color:#f97316; box-shadow:0 0 12px rgba(249,115,22,.55); }
   .card.is-notpaid .paid-btn{ opacity:.55; }
   .card.is-paid .pay-label{ color:#fde68a; }
 
-  /* YES state - GREEN */
-  .card.present{
-    background: linear-gradient(135deg, #14532d 0%, #166534 100%);
-    border-color:#22c55e;
-    box-shadow: 0 0 0 3px rgba(34,197,94,.25), 0 10px 30px rgba(34,197,94,.25);
-    animation: popGreen .45s cubic-bezier(.68,-0.55,.27,1.55);
+  /* Fix + Remove row */
+  .bottom-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.08); }
+  .fix-btn{
+    background:rgba(255,255,255,0.07); color:#cbd5e1; border:1.5px solid rgba(255,255,255,0.18);
+    padding:7px 13px; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; transition:all .2s;
   }
-  .card.present .avatar{ background: linear-gradient(135deg,#22c55e,#4ade80); }
-  .card.present .status-icon{ opacity:1; transform: scale(1); color:#4ade80; }
+  .fix-btn:hover{ background:rgba(255,255,255,0.15); }
+  .card.is-fixed .fix-btn{ background:#f59e0b; color:#111827; border-color:#f59e0b; box-shadow:0 0 12px rgba(245,158,11,.5); }
+  .remove-btn{
+    background:rgba(239,68,68,0.1); color:#f87171; border:1.5px solid rgba(239,68,68,0.35);
+    padding:7px 13px; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; transition:all .2s;
+  }
+  .remove-btn:hover{ background:#ef4444; color:white; }
+  .remove-btn:disabled{ opacity:.35; cursor:not-allowed; }
+  .remove-btn:disabled:hover{ background:rgba(239,68,68,0.1); color:#f87171; }
+
+  .card.is-fixed{ border-color:#f59e0b !important; box-shadow:0 0 0 3px rgba(245,158,11,.2), 0 10px 25px rgba(0,0,0,.3); }
+  .card.is-fixed .fixed-badge{ display:inline-block; }
+  .lock-note{ font-size:11px; color:#fbbf24; font-weight:700; margin-top:8px; display:none; }
+  .card.is-fixed .lock-note{ display:block; }
+
+  .card.present{ background:linear-gradient(135deg,#14532d 0%,#166534 100%); border-color:#22c55e; box-shadow:0 0 0 3px rgba(34,197,94,.25),0 10px 30px rgba(34,197,94,.25); animation:popGreen .45s; }
+  .card.present .avatar{ background:linear-gradient(135deg,#22c55e,#4ade80); }
+  .card.present .status-icon{ opacity:1; transform:scale(1); color:#4ade80; }
   .card.present .yes-btn{ background:#22c55e; color:white; border-color:#22c55e; box-shadow:0 0 12px rgba(34,197,94,.6); }
   .card.present .no-btn{ opacity:.75; cursor:pointer; }
   .card.present .no-btn:hover{ opacity:1; background:#ef4444; color:white; }
-
-  /* NO state - RED */
-  .card.absent{
-    background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%);
-    border-color:#ef4444;
-    box-shadow: 0 0 0 3px rgba(239,68,68,.25), 0 10px 30px rgba(239,68,68,.25);
-    animation: shakeRed .45s ease;
-  }
-  .card.absent .avatar{ background: linear-gradient(135deg,#ef4444,#f87171); }
-  .card.absent .status-icon{ opacity:1; transform: scale(1); color:#f87171; }
+  .card.absent{ background:linear-gradient(135deg,#450a0a 0%,#7f1d1d 100%); border-color:#ef4444; box-shadow:0 0 0 3px rgba(239,68,68,.25),0 10px 30px rgba(239,68,68,.25); animation:shakeRed .45s ease; }
+  .card.absent .avatar{ background:linear-gradient(135deg,#ef4444,#f87171); }
+  .card.absent .status-icon{ opacity:1; transform:scale(1); color:#f87171; }
   .card.absent .no-btn{ background:#ef4444; color:white; border-color:#ef4444; box-shadow:0 0 12px rgba(239,68,68,.6); }
   .card.absent .yes-btn{ opacity:.85; cursor:pointer; border-width:2px; }
-  .card.absent .yes-btn:hover{ opacity:1; background:#22c55e; color:white; transform: scale(1.08); box-shadow:0 4px 15px rgba(34,197,94,.5); }
+  .card.absent .yes-btn:hover{ opacity:1; background:#22c55e; color:white; transform:scale(1.08); box-shadow:0 4px 15px rgba(34,197,94,.5); }
+  .card.is-fixed.present,.card.is-fixed.absent{ border-color:#f59e0b !important; }
 
-  @keyframes fadeIn{ from{ opacity:0; transform: translateY(12px);} to{ opacity:1; transform: translateY(0);} }
-  @keyframes slideDown{ from{ opacity:0; transform: translateY(-16px);} to{ opacity:1; transform: translateY(0);} }
-  @keyframes popGreen{ 0%{ transform: scale(1); } 40%{ transform: scale(1.04); } 70%{ transform: scale(.98); } 100%{ transform: scale(1); } }
-  @keyframes shakeRed{ 0%,100%{ transform: translateX(0); } 15%{ transform: translateX(-8px); } 30%{ transform: translateX(8px); } 45%{ transform: translateX(-6px); } 60%{ transform: translateX(6px); } 75%{ transform: translateX(-3px); } 90%{ transform: translateX(3px); } }
-
-  .float-check{
-    position:fixed; pointer-events:none; font-size:28px; z-index:9999;
-    animation: floatUp 1s ease forwards;
-  }
-  @keyframes floatUp{ 0%{ opacity:1; transform: translateY(0) scale(.5); } 100%{ opacity:0; transform: translateY(-80px) scale(1.4); } }
-
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes slideDown{ from{opacity:0; transform:translateY(-16px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes popGreen{ 0%{transform:scale(1);} 40%{transform:scale(1.04);} 70%{transform:scale(.98);} 100%{transform:scale(1);} }
+  @keyframes shakeRed{ 0%,100%{transform:translateX(0);} 15%{transform:translateX(-8px);} 30%{transform:translateX(8px);} 45%{transform:translateX(-6px);} 60%{transform:translateX(6px);} 75%{transform:translateX(-3px);} 90%{transform:translateX(3px);} }
+  .float-check{ position:fixed; pointer-events:none; font-size:28px; z-index:9999; animation:floatUp 1s ease forwards; }
+  @keyframes floatUp{ 0%{opacity:1; transform:translateY(0) scale(.5);} 100%{opacity:0; transform:translateY(-80px) scale(1.4);} }
   .footer{ text-align:center; color:#475569; font-size:12px; margin-top:28px; line-height:1.6; }
   .empty{ text-align:center; padding:40px; color:var(--muted); grid-column:1/-1; }
-
-  @media(max-width:600px){
-    .stats, .pay-stats{ grid-template-columns: repeat(3,1fr); }
-    .stat .num{ font-size:24px; }
-    .grid{ grid-template-columns: 1fr; }
-    .yes-btn,.no-btn{ width:52px; height:44px; }
-    .pay-row{ flex-wrap:wrap; }
-  }
+  @media(max-width:600px){ .stats,.pay-stats{grid-template-columns:repeat(3,1fr);} .stat .num{font-size:24px;} .grid{grid-template-columns:1fr;} .yes-btn,.no-btn{width:52px;height:44px;} }
 </style>
 </head>
 <body>
@@ -298,8 +165,8 @@
   <div class="header">
     <div class="badge">🍽️ AIML Branch • Lunch Planning</div>
     <h1>Lunch Count — Who's Coming?</h1>
-    <p><b>60 Students</b> &nbsp;•&nbsp; <b style="color:#4ade80">YES</b> = Coming 🟢 &nbsp;•&nbsp; <b style="color:#f87171">NO</b> = Not Coming 🔴 &nbsp;•&nbsp; <b style="color:#fbbf24">Paid</b> = Money Paid 💰</p>
-    <div class="hint">💡 Changed your mind? Click the other button — <b>NO → YES</b> or <b>YES → NO</b> anytime! &nbsp;•&nbsp; Money also switchable: <b>Paid ↔ Not Paid</b></div>
+    <p><b id="headerTotal">60 Students</b> &nbsp;•&nbsp; <b style="color:#4ade80">YES</b> = Coming 🟢 &nbsp;•&nbsp; <b style="color:#f87171">NO</b> = Not Coming 🔴 &nbsp;•&nbsp; <b style="color:#fbbf24">Paid</b> = Money Paid 💰</p>
+   <!-- <div class="hint">💡 <b>📌 Fix</b> = Lock answer (can't change until you unfix) &nbsp;•&nbsp; <b>➕ Add</b> / <b>🗑️ Remove</b> members anytime<br>Changed your mind? Click other button — <b>NO → YES</b> / <b>Paid ↔ Not Paid</b> (only when not fixed)</div>-->
   </div>
 
   <div class="stats">
@@ -320,49 +187,57 @@
 
   <div class="progress-wrap">
     <div class="top"><span>🍽️ Lunch Response</span><span id="progressText">0 / 60 responded</span></div>
-    <div class="progress-bar">
-      <div class="fill-green" id="fillGreen"></div>
-      <div class="fill-red" id="fillRed"></div>
-    </div>
+    <div class="progress-bar"><div class="fill-green" id="fillGreen"></div><div class="fill-red" id="fillRed"></div></div>
   </div>
-
   <div class="progress-wrap">
     <div class="top"><span>💰 Money Collection</span><span id="payProgressText">0 / 60 paid</span></div>
-    <div class="progress-bar">
-      <div class="fill-gold" id="fillGold"></div>
-    </div>
+    <div class="progress-bar"><div class="fill-gold" id="fillGold"></div></div>
   </div>
 
   <div class="controls">
-    <div class="search">
-      <span>🔍</span>
-      <input type="text" id="searchInput" placeholder="Search roll number... e.g. 23471A6101">
-    </div>
+    <div class="search"><span>🔍</span><input type="text" id="searchInput" placeholder="Search roll number... e.g. 23471A6101"></div>
+    <button class="btn btn-add" onclick="toggleAddForm()">➕ Add Member</button>
     <button class="btn btn-all-yes" onclick="markAll('yes')">✓ All Yes</button>
     <button class="btn btn-all-no" onclick="markAll('no')">✕ All No</button>
+    <button class="btn btn-fixall" onclick="fixAll()">🔒 Fix All</button>
+    <button class="btn btn-fixall" onclick="unfixAll()">🔓 Unfix All</button>
+  </div>
+
+  <div class="add-form" id="addForm">
+    <h3>➕ Add New Member</h3>
+    <div class="row">
+      <input type="text" id="newRollInput" placeholder="Enter Roll Number e.g. 23471A6153" maxlength="20">
+      <button class="btn btn-add-confirm" onclick="addMember()">Add Member</button>
+      <button class="btn btn-cancel" onclick="toggleAddForm()">Cancel</button>
+    </div>
+    <div class="note">Tip: If roll starts with 24475A61, it will auto-show as LE-1, LE-2... &nbsp;•&nbsp; Roll number must be unique.</div>
   </div>
 
   <div class="filters">
-    <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">All (60)</button>
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)" id="filterAll">All (60)</button>
     <button class="filter-btn" data-filter="yes" onclick="setFilter('yes', this)">✓ Coming</button>
     <button class="filter-btn" data-filter="no" onclick="setFilter('no', this)">✕ Not Coming</button>
     <button class="filter-btn" data-filter="pending" onclick="setFilter('pending', this)">○ Not Responded</button>
     <button class="filter-btn" data-filter="paid" onclick="setFilter('paid', this)">💰 Paid</button>
     <button class="filter-btn" data-filter="notpaid" onclick="setFilter('notpaid', this)">⏳ Not Paid</button>
+    <button class="filter-btn" data-filter="fixed" onclick="setFilter('fixed', this)">🔒 Fixed</button>
   </div>
 
   <div class="grid" id="grid"></div>
 
-  <div class="footer">🍽️ AIML Branch Lunch Planning • 23471A6101 – 23471A6152 &nbsp;|&nbsp; 24475A6101 – 24475A6108 (LE-1 to LE-8)<br>You can change YES ↔ NO and Paid ↔ Not Paid anytime</div>
+  <div class="footer">🍽️ AIML Branch Lunch Planning • 23471A6101 – 23471A6152 &nbsp;|&nbsp; 24475A6101 – 24475A6108 (LE-1 to LE-8)<br>📌 Fix locks YES/NO & Paid — unfix to change &nbsp;•&nbsp; ➕ Add / 🗑️ Remove members anytime</div>
 </div>
 
 <script>
-  const rolls = [];
-  for (let i = 1; i <= 52; i++) rolls.push('23471A61' + String(i).padStart(2, '0'));
-  for (let i = 1; i <= 8; i++) rolls.push('24475A61' + String(i).padStart(2, '0'));
+  const baseRolls = [];
+  for (let i = 1; i <= 52; i++) baseRolls.push('23471A61' + String(i).padStart(2, '0'));
+  for (let i = 1; i <= 8; i++) baseRolls.push('24475A61' + String(i).padStart(2, '0'));
 
-  let state = JSON.parse(localStorage.getItem('aiml_state') || '{}'); // lunch yes/no
-  let payState = JSON.parse(localStorage.getItem('aiml_pay_state') || '{}'); // paid/notpaid
+  let state = JSON.parse(localStorage.getItem('aiml_state') || '{}');
+  let payState = JSON.parse(localStorage.getItem('aiml_pay_state') || '{}');
+  let fixedState = JSON.parse(localStorage.getItem('aiml_fixed_state') || '{}');
+  let customRolls = JSON.parse(localStorage.getItem('aiml_custom_rolls') || '[]');
+  let removedRolls = JSON.parse(localStorage.getItem('aiml_removed_rolls') || '[]');
   let amountPerPerson = parseFloat(localStorage.getItem('aiml_amount') || '0') || 0;
   let currentFilter = 'all';
   let searchQuery = '';
@@ -371,22 +246,95 @@
   const amountInput = document.getElementById('amountInput');
   amountInput.value = amountPerPerson || '';
 
+  function getActiveRolls(){
+    const base = baseRolls.filter(r => !removedRolls.includes(r));
+    const custom = customRolls.filter(r => !removedRolls.includes(r));
+    return [...base, ...custom];
+  }
   function saveState(){ localStorage.setItem('aiml_state', JSON.stringify(state)); }
   function savePayState(){ localStorage.setItem('aiml_pay_state', JSON.stringify(payState)); }
+  function saveFixedState(){ localStorage.setItem('aiml_fixed_state', JSON.stringify(fixedState)); }
+  function saveCustom(){ localStorage.setItem('aiml_custom_rolls', JSON.stringify(customRolls)); }
+  function saveRemoved(){ localStorage.setItem('aiml_removed_rolls', JSON.stringify(removedRolls)); }
+
+  function toggleAddForm(){
+    const f = document.getElementById('addForm');
+    f.classList.toggle('open');
+    if (f.classList.contains('open')) document.getElementById('newRollInput').focus();
+  }
+
+  function addMember(){
+    const input = document.getElementById('newRollInput');
+    const roll = input.value.trim().toUpperCase();
+    if (!roll){ alert('Please enter a roll number'); return; }
+    const active = getActiveRolls();
+    if (active.includes(roll)){ alert(roll + ' already exists!'); return; }
+    // If it was previously removed, un-remove it
+    if (removedRolls.includes(roll)){
+      removedRolls = removedRolls.filter(r => r !== roll);
+      saveRemoved();
+    } else {
+      customRolls.push(roll);
+      saveCustom();
+    }
+    input.value = '';
+    document.getElementById('addForm').classList.remove('open');
+    render();
+    // scroll to new card
+    setTimeout(() => {
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(c => { if (c.textContent.includes(roll)) c.scrollIntoView({behavior:'smooth', block:'center'}); });
+    }, 100);
+  }
+
+  document.getElementById('newRollInput').addEventListener('keydown', e => { if (e.key === 'Enter') addMember(); });
+
+  function removeMember(roll){
+    if (fixedState[roll]){ alert('🔒 This member is Fixed. Unfix first to remove.'); return; }
+    if (!confirm('Remove ' + roll + ' from the list?')) return;
+    if (customRolls.includes(roll)){
+      customRolls = customRolls.filter(r => r !== roll);
+      saveCustom();
+    } else {
+      if (!removedRolls.includes(roll)) removedRolls.push(roll);
+      saveRemoved();
+    }
+    delete state[roll]; delete payState[roll]; delete fixedState[roll];
+    saveState(); savePayState(); saveFixedState();
+    render();
+  }
+
+  function toggleFix(roll){
+    if (fixedState[roll]) delete fixedState[roll];
+    else fixedState[roll] = true;
+    saveFixedState();
+    render();
+  }
+
+  function fixAll(){
+    getActiveRolls().forEach(r => fixedState[r] = true);
+    saveFixedState(); render();
+  }
+  function unfixAll(){
+    fixedState = {}; saveFixedState(); render();
+  }
 
   function render() {
+    const activeRolls = getActiveRolls();
     grid.innerHTML = '';
     let visible = 0;
 
-    rolls.forEach((roll, idx) => {
+    activeRolls.forEach((roll, idx) => {
       const status = state[roll] || '';
       const pay = payState[roll] || '';
+      const isFixed = !!fixedState[roll];
 
       if (currentFilter === 'yes' && status !== 'yes') return;
       if (currentFilter === 'no' && status !== 'no') return;
       if (currentFilter === 'pending' && status !== '') return;
       if (currentFilter === 'paid' && pay !== 'paid') return;
       if (currentFilter === 'notpaid' && pay !== 'notpaid') return;
+      if (currentFilter === 'fixed' && !isFixed) return;
       if (searchQuery && !roll.toLowerCase().includes(searchQuery.toLowerCase())) return;
 
       visible++;
@@ -397,6 +345,7 @@
       if (status === 'no') cls += ' absent';
       if (pay === 'paid') cls += ' is-paid';
       if (pay === 'notpaid') cls += ' is-notpaid';
+      if (isFixed) cls += ' is-fixed';
       card.className = cls;
       card.style.animationDelay = (idx * 0.015) + 's';
 
@@ -404,11 +353,12 @@
       const isLE = roll.startsWith('24475A61');
       const leLabel = isLE ? 'LE-' + parseInt(num, 10) : '';
       const leBadge = isLE ? `<span class="le-badge">${leLabel}</span>` : '';
+      const fixedBadge = isFixed ? `<span class="fixed-badge">🔒 FIXED</span>` : '';
 
       const baseSub = status === 'yes' ? '🍽️ Coming for Lunch' : status === 'no' ? '❌ Not Coming — tap YES to change' : 'Tap YES or NO';
       const subText = isLE ? `${leLabel} • ${baseSub}` : `AIML • ${baseSub}`;
-
       const payLabel = pay === 'paid' ? '<b>💰 Paid ✓</b>' : pay === 'notpaid' ? '⏳ Not Paid' : '💰 Money:';
+      const dis = isFixed ? 'disabled' : '';
 
       card.innerHTML = `
         <div class="status-icon">${status === 'yes' ? '✓' : status === 'no' ? '✕' : ''}</div>
@@ -416,35 +366,39 @@
           <div class="left">
             <div class="avatar">${num}<span class="pay-dot">₹</span></div>
             <div class="info">
-              <div class="roll">${roll}${leBadge}</div>
+              <div class="roll">${roll}${leBadge}${fixedBadge}</div>
               <div class="sub">${subText}</div>
             </div>
           </div>
           <div class="actions">
-            <button class="yes-btn" onclick="mark('${roll}', 'yes', this)" title="Yes - Coming for Lunch">YES</button>
-            <button class="no-btn" onclick="mark('${roll}', 'no', this)" title="No - Not Coming">NO</button>
+            <button class="yes-btn" ${dis} onclick="mark('${roll}', 'yes', this)" title="${isFixed ? '🔒 Fixed — unfix to change' : 'Yes - Coming for Lunch'}">YES</button>
+            <button class="no-btn" ${dis} onclick="mark('${roll}', 'no', this)" title="${isFixed ? '🔒 Fixed — unfix to change' : 'No - Not Coming'}">NO</button>
           </div>
         </div>
         <div class="pay-row">
           <div class="pay-label">${payLabel}</div>
           <div class="pay-actions">
-            <button class="paid-btn" onclick="markPay('${roll}', 'paid', this)" title="Money Paid">💰 Paid</button>
-            <button class="notpaid-btn" onclick="markPay('${roll}', 'notpaid', this)" title="Money Not Paid">Not Paid</button>
+            <button class="paid-btn" ${dis} onclick="markPay('${roll}', 'paid', this)" title="${isFixed ? '🔒 Fixed' : 'Money Paid'}">💰 Paid</button>
+            <button class="notpaid-btn" ${dis} onclick="markPay('${roll}', 'notpaid', this)" title="${isFixed ? '🔒 Fixed' : 'Money Not Paid'}">Not Paid</button>
           </div>
+        </div>
+        <div class="lock-note">🔒 Fixed — click Fix button below to unlock & change</div>
+        <div class="bottom-row">
+          <button class="fix-btn" onclick="toggleFix('${roll}')" title="Fix / Unfix this member">${isFixed ? '🔓 Unfix (Unlock)' : '📌 Fix (Lock)'}</button>
+          <button class="remove-btn" ${dis} onclick="removeMember('${roll}')" title="${isFixed ? 'Unfix first to remove' : 'Remove this member'}">🗑️ Remove</button>
         </div>
       `;
       grid.appendChild(card);
     });
 
-    if (visible === 0) grid.innerHTML = '<div class="empty">No roll numbers found 🔍</div>';
-    updateStats();
+    if (visible === 0) grid.innerHTML = '<div class="empty">No members found 🔍</div>';
+    updateStats(activeRolls);
   }
 
   function floatEmoji(btn, emoji){
     const rect = btn.getBoundingClientRect();
     const el = document.createElement('div');
-    el.className = 'float-check';
-    el.textContent = emoji;
+    el.className = 'float-check'; el.textContent = emoji;
     el.style.left = (rect.left + rect.width/2 - 14) + 'px';
     el.style.top = (rect.top - 10) + 'px';
     document.body.appendChild(el);
@@ -452,25 +406,24 @@
   }
 
   function mark(roll, type, btn) {
-    if (state[roll] === type) delete state[roll];
-    else state[roll] = type;
+    if (fixedState[roll]) return;
+    if (state[roll] === type) delete state[roll]; else state[roll] = type;
     saveState();
     if (state[roll]) floatEmoji(btn, type === 'yes' ? '✅' : '❌');
     render();
   }
 
   function markPay(roll, type, btn) {
-    if (payState[roll] === type) delete payState[roll];
-    else payState[roll] = type;
+    if (fixedState[roll]) return;
+    if (payState[roll] === type) delete payState[roll]; else payState[roll] = type;
     savePayState();
     if (payState[roll]) floatEmoji(btn, type === 'paid' ? '💰' : '⏳');
     render();
   }
 
   function markAll(type) {
-    rolls.forEach(r => state[r] = type);
-    saveState();
-    render();
+    getActiveRolls().forEach(r => { if (!fixedState[r]) state[r] = type; });
+    saveState(); render();
   }
 
   function setFilter(filter, btn) {
@@ -480,30 +433,29 @@
     render();
   }
 
-  function updateStats() {
-    const values = Object.values(state);
-    const yes = values.filter(v => v === 'yes').length;
-    const no = values.filter(v => v === 'no').length;
-    const total = rolls.length;
+  function updateStats(activeRolls) {
+    activeRolls = activeRolls || getActiveRolls();
+    const total = activeRolls.length;
+    const yes = activeRolls.filter(r => state[r] === 'yes').length;
+    const no = activeRolls.filter(r => state[r] === 'no').length;
     const marked = yes + no;
-
-    const payValues = Object.values(payState);
-    const paid = payValues.filter(v => v === 'paid').length;
-    const notPaid = payValues.filter(v => v === 'notpaid').length;
+    const paid = activeRolls.filter(r => payState[r] === 'paid').length;
+    const notPaid = activeRolls.filter(r => payState[r] === 'notpaid').length;
 
     document.getElementById('yesCount').textContent = yes;
     document.getElementById('noCount').textContent = no;
     document.getElementById('totalCount').textContent = total;
     document.getElementById('paidCount').textContent = paid;
     document.getElementById('notPaidCount').textContent = notPaid;
+    document.getElementById('headerTotal').textContent = total + ' Students';
+    document.getElementById('filterAll').textContent = 'All (' + total + ')';
     document.getElementById('progressText').textContent = marked + ' / ' + total + ' responded';
     document.getElementById('payProgressText').textContent = paid + ' / ' + total + ' paid';
-    document.getElementById('fillGreen').style.width = (yes / total * 100) + '%';
-    document.getElementById('fillRed').style.width = (no / total * 100) + '%';
-    document.getElementById('fillGold').style.width = (paid / total * 100) + '%';
+    document.getElementById('fillGreen').style.width = (total ? yes/total*100 : 0) + '%';
+    document.getElementById('fillRed').style.width = (total ? no/total*100 : 0) + '%';
+    document.getElementById('fillGold').style.width = (total ? paid/total*100 : 0) + '%';
 
-    // Amount calculation: collected from Coming students who paid
-    const paidComing = rolls.filter(r => state[r] === 'yes' && payState[r] === 'paid').length;
+    const paidComing = activeRolls.filter(r => state[r] === 'yes' && payState[r] === 'paid').length;
     const comingNotPaid = yes - paidComing;
     const amtText = document.getElementById('amountText');
     if (amountPerPerson > 0) {
@@ -523,12 +475,10 @@
   });
 
   document.getElementById('searchInput').addEventListener('input', function() {
-    searchQuery = this.value.trim();
-    render();
+    searchQuery = this.value.trim(); render();
   });
 
   render();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5dea12e0ebe418c',t:'MTc5NTI1Mjk0Mw=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5dea12e0ebe418c',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
