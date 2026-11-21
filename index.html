@@ -215,57 +215,17 @@
     <div class="badge">🍽️ AIML Branch • Lunch Planning</div>
     <h1>Lunch Count — Who's Coming?</h1>
     <p><b id="headerTotal">60 Students</b> &nbsp;•&nbsp; <b style="color:#4ade80">YES</b> = Coming 🟢 &nbsp;•&nbsp; <b style="color:#f87171">NO</b> = Not Coming 🔴 &nbsp;•&nbsp; <b style="color:#fbbf24">Paid</b> = Money Paid 💰</p>
-    <!--<div class="hint">💡 <b>📌 Fix</b> = Lock answer (can't change until you unfix) &nbsp;•&nbsp; <b>➕ Add</b> / <b>🗑️ Remove</b> members anytime<br>Changed your mind? Click other button — <b>NO → YES</b> / <b>Paid ↔ Not Paid</b> (only when not fixed)</div>-->
+   <!-- <div class="hint">💡 <b>📌 Fix</b> = Lock answer (can't change until you unfix) &nbsp;•&nbsp; <b>➕ Add</b> / <b>🗑️ Remove</b> members anytime<br>Changed your mind? Click other button — <b>NO → YES</b> / <b>Paid ↔ Not Paid</b> (only when not fixed)</div>-->
   </div>
 
   <div class="sync-bar">
     <div class="sync-status"><span class="sync-dot" id="syncDot"></span><span id="syncText">🔴 Local Only — Firebase not connected</span></div>
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
       <span class="room-pill" id="roomPill">Room: —</span>
-      <button class="btn btn-share" onclick="toggleFirebasePanel()">⚙️ Firebase Setup</button>
     </div>
   </div>
 
-  <div class="firebase-panel" id="firebasePanel">
-    <h3>🔥 Firebase Realtime Database — project: aiml-58d47</h3>
-    <p>Your Firebase app config is embedded. Create the database and enter its URL here to enable sync:</p>
-    <ol>
-      <li>Open <b>console.firebase.google.com</b> → project <code>aiml-58d47</code> → <b>Realtime Database</b> → <b>Create Database</b> → choose a location.</li>
-      <li>Copy the database URL shown at the top (for example, <code>https://PROJECT-default-rtdb.firebaseio.com</code>; use your exact URL).</li>
-      <li>In the Realtime Database <b>Rules</b> tab, publish the rules below.</li>
-      <li>Paste the Database URL in the field, press <b>Save &amp; Connect</b>, then share <code>firebase.html</code> and the same room code with classmates.</li>
-    </ol>
-    <p><b>Realtime Database Rules:</b> These allow read/write only for the room path, so treat the room code as shareable access. Publish in Realtime Database → Rules.</p>
-    <pre>{
-  "rules": {
-    "rooms": {
-      "AIML-LUNCH-2026": {
-        ".read": true,
-        ".write": true
-      }
-    }
-  }
-}</pre>
-    <p><b>Security:</b> Anyone who knows or guesses the room path can edit the lunch data. For a casual class list this is convenient; avoid storing private information. A stronger setup needs Firebase Authentication and authenticated rules.</p>
-    <div class="fb-grid">
-      <div><label>apiKey</label><input id="fb_apiKey" placeholder="AIza..."></div>
-      <div><label>authDomain</label><input id="fb_authDomain" placeholder="aiml-58d47.firebaseapp.com"></div>
-      <div><label>projectId</label><input id="fb_projectId" placeholder="aiml-58d47"></div>
-      <div><label>storageBucket</label><input id="fb_storageBucket" placeholder="aiml-58d47.firebasestorage.app"></div>
-      <div><label>messagingSenderId</label><input id="fb_messagingSenderId" placeholder="1028164423927"></div>
-      <div><label>appId</label><input id="fb_appId" placeholder="1:1028..."></div>
-      <div style="grid-column:1/-1;"><label>Realtime Database URL (copy exact URL from Firebase Console)</label><input id="fb_databaseURL" placeholder="https://YOUR-PROJECT-default-rtdb.firebaseio.com"></div>
-      <div style="grid-column:1/-1;"><label>Room Code (same for all devices)</label><input id="fb_room" placeholder="AIML-LUNCH-2026"></div>
-    </div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button class="btn btn-add-confirm" onclick="saveFirebaseConfig()">💾 Save & Connect</button>
-      <button class="btn btn-cancel" onclick="disconnectFirebase()">Disconnect (Local Only)</button>
-      <button class="btn btn-cancel" onclick="toggleFirebasePanel()">Close</button>
-    </div>
-    <p style="margin-top:10px;">💡 The form is pre-filled with the embedded config when you open this panel — values are only needed if you want to override them on this device.</p>
-  </div>
-
-  <div class="warn-banner" id="localWarn">⚠️ <b>Not connected:</b> Changes are blocked until Firebase Realtime Database connects. Enter the database URL and wait for the green Connected status. No lunch data is saved in this browser.</div>
+  <div class="warn-banner" id="localWarn">⚠️ <b>Waiting for Firebase:</b> The organizer must add the Realtime Database URL once in <code>firebase.js</code>. Changes are disabled until the page shows Connected.</div>
 
   <div class="stats">
     <div class="stat white"><div class="num" id="totalCount">60</div><div class="label">Total</div></div>
