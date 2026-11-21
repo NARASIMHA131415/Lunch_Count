@@ -2,12 +2,13 @@ const baseRolls = [];
   for (let i = 1; i <= 52; i++) baseRolls.push('23471A61' + String(i).padStart(2, '0'));
   for (let i = 1; i <= 8; i++) baseRolls.push('24475A61' + String(i).padStart(2, '0'));
 
-  let state = JSON.parse(localStorage.getItem('aiml_state') || '{}');
-  let payState = JSON.parse(localStorage.getItem('aiml_pay_state') || '{}');
-  let fixedState = JSON.parse(localStorage.getItem('aiml_fixed_state') || '{}');
-  let customRolls = JSON.parse(localStorage.getItem('aiml_custom_rolls') || '[]');
-  let removedRolls = JSON.parse(localStorage.getItem('aiml_removed_rolls') || '[]');
-  let amountPerPerson = parseFloat(localStorage.getItem('aiml_amount') || '0') || 0;
+  // Shared app data is loaded only from Realtime Database; do not restore it from browser storage.
+  let state = {};
+  let payState = {};
+  let fixedState = {};
+  let customRolls = [];
+  let removedRolls = [];
+  let amountPerPerson = 0;
   let currentFilter = 'all';
   let searchQuery = '';
 
@@ -20,11 +21,16 @@ const baseRolls = [];
     const custom = customRolls.filter(r => !removedRolls.includes(r));
     return [...base, ...custom];
   }
-  function saveState(){ localStorage.setItem('aiml_state', JSON.stringify(state)); pushToFirebase(); }
-  function savePayState(){ localStorage.setItem('aiml_pay_state', JSON.stringify(payState)); pushToFirebase(); }
-  function saveFixedState(){ localStorage.setItem('aiml_fixed_state', JSON.stringify(fixedState)); pushToFirebase(); }
-  function saveCustom(){ localStorage.setItem('aiml_custom_rolls', JSON.stringify(customRolls)); pushToFirebase(); }
-  function saveRemoved(){ localStorage.setItem('aiml_removed_rolls', JSON.stringify(removedRolls)); pushToFirebase(); }
+  function saveState(){ pushToFirebase(); }
+  function savePayState(){ pushToFirebase(); }
+  function saveFixedState(){ pushToFirebase(); }
+  function saveCustom(){ pushToFirebase(); }
+  function saveRemoved(){ pushToFirebase(); }
+  function requireLiveConnection(){
+    if (isFirebaseConnected && fbDocRef) return true;
+    alert('Not connected to Firebase Realtime Database. Enter the database URL in Firebase Setup and wait for the green Connected status before making changes. Nothing was saved.');
+    return false;
+  }
 
   /* ===== FIREBASE SYNC ===== */
   // 🔥 Embedded Firebase config (aiml-58d47) — file works out of the box, no manual setup needed on each device
@@ -157,12 +163,6 @@ const baseRolls = [];
             customRolls = Array.isArray(data.customRolls) ? data.customRolls : [];
             removedRolls = Array.isArray(data.removedRolls) ? data.removedRolls : [];
             amountPerPerson = parseFloat(data.amountPerPerson) || 0;
-            localStorage.setItem('aiml_state', JSON.stringify(state));
-            localStorage.setItem('aiml_pay_state', JSON.stringify(payState));
-            localStorage.setItem('aiml_fixed_state', JSON.stringify(fixedState));
-            localStorage.setItem('aiml_custom_rolls', JSON.stringify(customRolls));
-            localStorage.setItem('aiml_removed_rolls', JSON.stringify(removedRolls));
-            localStorage.setItem('aiml_amount', amountPerPerson);
             amountInput.value = amountPerPerson || '';
             render();
             setTimeout(() => { isApplyingRemote = false; }, 100);
@@ -197,12 +197,6 @@ const baseRolls = [];
             customRolls = Array.isArray(data.customRolls) ? data.customRolls : [];
             removedRolls = Array.isArray(data.removedRolls) ? data.removedRolls : [];
             amountPerPerson = parseFloat(data.amountPerPerson) || 0;
-            localStorage.setItem('aiml_state', JSON.stringify(state));
-            localStorage.setItem('aiml_pay_state', JSON.stringify(payState));
-            localStorage.setItem('aiml_fixed_state', JSON.stringify(fixedState));
-            localStorage.setItem('aiml_custom_rolls', JSON.stringify(customRolls));
-            localStorage.setItem('aiml_removed_rolls', JSON.stringify(removedRolls));
-            localStorage.setItem('aiml_amount', amountPerPerson);
             amountInput.value = amountPerPerson || ''; render();
             setTimeout(() => { isApplyingRemote = false; }, 100);
           }, err => { console.error(err); isFirebaseConnected = false; updateSyncUI(); if(fromUser) alert('Realtime Database error: '+err.message); });
@@ -260,6 +254,7 @@ const baseRolls = [];
   }
 
   function applyData(data){
+    if (!requireLiveConnection()) return;
     if (!data || typeof data !== 'object') throw new Error('Invalid data');
     state = data.state || {};
     payState = data.payState || {};
@@ -268,7 +263,6 @@ const baseRolls = [];
     removedRolls = data.removedRolls || [];
     amountPerPerson = parseFloat(data.amountPerPerson) || 0;
     saveState(); savePayState(); saveFixedState(); saveCustom(); saveRemoved();
-    localStorage.setItem('aiml_amount', amountPerPerson);
     amountInput.value = amountPerPerson || '';
     render();
   }
@@ -292,7 +286,7 @@ const baseRolls = [];
     reader.onload = function(e){
       try {
         const data = JSON.parse(e.target.result);
-        if (!confirm('Import this data? Current data on this device will be replaced.')) return;
+        if (!confirm('Import this data into the connected Firebase room? Current cloud room data will be replaced for everyone.')) return;
         applyData(data);
         alert('✅ Data imported successfully!');
       } catch(err){ alert('❌ Invalid file. Please select a valid exported JSON file.'); }
@@ -325,6 +319,7 @@ const baseRolls = [];
   }
 
   function addMember(){
+    if (!requireLiveConnection()) return;
     const input = document.getElementById('newRollInput');
     const roll = input.value.trim().toUpperCase();
     if (!roll){ alert('Please enter a roll number'); return; }
@@ -351,6 +346,7 @@ const baseRolls = [];
   document.getElementById('newRollInput').addEventListener('keydown', e => { if (e.key === 'Enter') addMember(); });
 
   function removeMember(roll){
+    if (!requireLiveConnection()) return;
     if (fixedState[roll]){ alert('🔒 This member is Fixed. Unfix first to remove.'); return; }
     if (!confirm('Remove ' + roll + ' from the list?')) return;
     if (customRolls.includes(roll)){
@@ -366,6 +362,7 @@ const baseRolls = [];
   }
 
   function toggleFix(roll){
+    if (!requireLiveConnection()) return;
     if (fixedState[roll]) delete fixedState[roll];
     else fixedState[roll] = true;
     saveFixedState();
@@ -373,10 +370,12 @@ const baseRolls = [];
   }
 
   function fixAll(){
+    if (!requireLiveConnection()) return;
     getActiveRolls().forEach(r => fixedState[r] = true);
     saveFixedState(); render();
   }
   function unfixAll(){
+    if (!requireLiveConnection()) return;
     fixedState = {}; saveFixedState(); render();
   }
 
@@ -467,6 +466,7 @@ const baseRolls = [];
   }
 
   function mark(roll, type, btn) {
+    if (!requireLiveConnection()) return;
     if (fixedState[roll]) return;
     if (state[roll] === type) delete state[roll]; else state[roll] = type;
     saveState();
@@ -475,6 +475,7 @@ const baseRolls = [];
   }
 
   function markPay(roll, type, btn) {
+    if (!requireLiveConnection()) return;
     if (fixedState[roll]) return;
     if (payState[roll] === type) delete payState[roll]; else payState[roll] = type;
     savePayState();
@@ -483,6 +484,7 @@ const baseRolls = [];
   }
 
   function markAll(type) {
+    if (!requireLiveConnection()) return;
     getActiveRolls().forEach(r => { if (!fixedState[r]) state[r] = type; });
     saveState(); render();
   }
@@ -530,8 +532,8 @@ const baseRolls = [];
   }
 
   amountInput.addEventListener('input', function(){
+    if (!requireLiveConnection()){ this.value = amountPerPerson || ''; return; }
     amountPerPerson = parseFloat(this.value) || 0;
-    localStorage.setItem('aiml_amount', amountPerPerson);
     pushToFirebase();
     updateStats();
   });
