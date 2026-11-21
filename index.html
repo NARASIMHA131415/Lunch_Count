@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIML Branch — Lunch Count 🍽️</title>
+<title>AIML Branch — Lunch Count 🍽️ (Firebase Sync)</title>
+<!-- Firebase SDK v13.4.0 compat (needs internet) -->
+<script src="https://www.gstatic.com/firebasejs/13.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/13.4.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/13.4.0/firebase-auth-compat.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{ --text:#f1f5f9; --muted:#94a3b8; --green:#22c55e; --red:#ef4444; --gold:#f59e0b; --orange:#f97316; }
@@ -48,6 +52,51 @@
   .btn-add{ background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white; }
   .btn-fixall{ background:#334155; color:#e2e8f0; border:1px solid rgba(255,255,255,.15); }
   .btn-fixall:hover{ background:#475569; }
+  .btn-share{ background:linear-gradient(135deg,#0ea5e9,#0284c7); color:white; }
+  .btn-share:hover{ filter:brightness(1.1); }
+  .warn-banner{
+    background:rgba(245,158,11,0.12); border:1.5px solid rgba(245,158,11,0.5); color:#fde68a;
+    border-radius:14px; padding:12px 16px; font-size:13px; line-height:1.5; margin-bottom:18px;
+  }
+  .warn-banner b{ color:#fbbf24; }
+  .sync-bar{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;
+    background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+    border-radius:14px; padding:12px 16px; margin-bottom:14px;
+  }
+  .sync-status{ font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px; }
+  .sync-dot{ width:11px; height:11px; border-radius:50%; background:#ef4444; box-shadow:0 0 8px #ef4444; }
+  .sync-dot.online{ background:#22c55e; box-shadow:0 0 8px #22c55e; animation:pulseDot 2s infinite; }
+  @keyframes pulseDot{ 0%,100%{opacity:1;} 50%{opacity:.5;} }
+  .room-pill{ background:rgba(99,102,241,0.2); border:1px solid rgba(99,102,241,0.5); color:#c7d2fe; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:800; letter-spacing:.5px; }
+  .firebase-panel{
+    display:none; background:rgba(245,158,11,0.08); border:1.5px dashed rgba(245,158,11,0.6);
+    border-radius:16px; padding:16px; margin-bottom:18px;
+  }
+  .firebase-panel.open{ display:block; animation:fadeIn .3s ease; }
+  .firebase-panel h3{ font-size:15px; margin-bottom:8px; }
+  .firebase-panel p, .firebase-panel li{ font-size:12px; color:var(--muted); line-height:1.6; }
+  .firebase-panel ol{ margin-left:18px; margin-bottom:10px; }
+  .firebase-panel code{ background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:6px; font-size:11px; color:#fde68a; }
+  .firebase-panel pre{ background:#0f172a; border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:10px; font-size:11px; overflow:auto; color:#a5f3fc; margin:8px 0; }
+  .fb-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0; }
+  .fb-grid label{ font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:4px; }
+  .fb-grid input{ width:100%; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:9px 11px; color:white; font-size:13px; outline:none; }
+  .fb-grid input:focus{ border-color:#f59e0b; }
+  @media(max-width:600px){ .fb-grid{ grid-template-columns:1fr; } }
+  .share-panel{
+    display:none; background:rgba(14,165,233,0.1); border:1.5px dashed rgba(14,165,233,0.6);
+    border-radius:16px; padding:16px; margin-bottom:18px;
+  }
+  .share-panel.open{ display:block; animation:fadeIn .3s ease; }
+  .share-panel h3{ font-size:15px; margin-bottom:8px; }
+  .share-panel p{ font-size:12px; color:var(--muted); margin-bottom:10px; line-height:1.5; }
+  .share-panel textarea{
+    width:100%; min-height:90px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+    border-radius:12px; padding:10px; color:white; font-size:12px; font-family:'Courier New', monospace;
+    outline:none; resize:vertical; word-break:break-all;
+  }
+  .share-panel .row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
 
   /* Add member form */
   .add-form{
@@ -166,8 +215,57 @@
     <div class="badge">🍽️ AIML Branch • Lunch Planning</div>
     <h1>Lunch Count — Who's Coming?</h1>
     <p><b id="headerTotal">60 Students</b> &nbsp;•&nbsp; <b style="color:#4ade80">YES</b> = Coming 🟢 &nbsp;•&nbsp; <b style="color:#f87171">NO</b> = Not Coming 🔴 &nbsp;•&nbsp; <b style="color:#fbbf24">Paid</b> = Money Paid 💰</p>
-   <!-- <div class="hint">💡 <b>📌 Fix</b> = Lock answer (can't change until you unfix) &nbsp;•&nbsp; <b>➕ Add</b> / <b>🗑️ Remove</b> members anytime<br>Changed your mind? Click other button — <b>NO → YES</b> / <b>Paid ↔ Not Paid</b> (only when not fixed)</div>-->
+    <div class="hint">💡 <b>📌 Fix</b> = Lock answer (can't change until you unfix) &nbsp;•&nbsp; <b>➕ Add</b> / <b>🗑️ Remove</b> members anytime<br>Changed your mind? Click other button — <b>NO → YES</b> / <b>Paid ↔ Not Paid</b> (only when not fixed)</div>
   </div>
+
+  <div class="sync-bar">
+    <div class="sync-status"><span class="sync-dot" id="syncDot"></span><span id="syncText">🔴 Local Only — Firebase not connected</span></div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <span class="room-pill" id="roomPill">Room: —</span>
+      <button class="btn btn-share" onclick="toggleFirebasePanel()">⚙️ Firebase Setup</button>
+    </div>
+  </div>
+
+  <div class="firebase-panel" id="firebasePanel">
+    <h3>🔥 Firebase Realtime Database — project: aiml-58d47</h3>
+    <p>Your Firebase app config is embedded. Create the database and enter its URL here to enable sync:</p>
+    <ol>
+      <li>Open <b>console.firebase.google.com</b> → project <code>aiml-58d47</code> → <b>Realtime Database</b> → <b>Create Database</b> → choose a location.</li>
+      <li>Copy the database URL shown at the top (for example, <code>https://PROJECT-default-rtdb.firebaseio.com</code>; use your exact URL).</li>
+      <li>In the Realtime Database <b>Rules</b> tab, publish the rules below.</li>
+      <li>Paste the Database URL in the field, press <b>Save &amp; Connect</b>, then share <code>firebase.html</code> and the same room code with classmates.</li>
+    </ol>
+    <p><b>Realtime Database Rules:</b> These allow read/write only for the room path, so treat the room code as shareable access. Publish in Realtime Database → Rules.</p>
+    <pre>{
+  "rules": {
+    "rooms": {
+      "AIML-LUNCH-2026": {
+        ".read": true,
+        ".write": true
+      }
+    }
+  }
+}</pre>
+    <p><b>Security:</b> Anyone who knows or guesses the room path can edit the lunch data. For a casual class list this is convenient; avoid storing private information. A stronger setup needs Firebase Authentication and authenticated rules.</p>
+    <div class="fb-grid">
+      <div><label>apiKey</label><input id="fb_apiKey" placeholder="AIza..."></div>
+      <div><label>authDomain</label><input id="fb_authDomain" placeholder="aiml-58d47.firebaseapp.com"></div>
+      <div><label>projectId</label><input id="fb_projectId" placeholder="aiml-58d47"></div>
+      <div><label>storageBucket</label><input id="fb_storageBucket" placeholder="aiml-58d47.firebasestorage.app"></div>
+      <div><label>messagingSenderId</label><input id="fb_messagingSenderId" placeholder="1028164423927"></div>
+      <div><label>appId</label><input id="fb_appId" placeholder="1:1028..."></div>
+      <div style="grid-column:1/-1;"><label>Realtime Database URL (copy exact URL from Firebase Console)</label><input id="fb_databaseURL" placeholder="https://YOUR-PROJECT-default-rtdb.firebaseio.com"></div>
+      <div style="grid-column:1/-1;"><label>Room Code (same for all devices)</label><input id="fb_room" placeholder="AIML-LUNCH-2026"></div>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn btn-add-confirm" onclick="saveFirebaseConfig()">💾 Save & Connect</button>
+      <button class="btn btn-cancel" onclick="disconnectFirebase()">Disconnect (Local Only)</button>
+      <button class="btn btn-cancel" onclick="toggleFirebasePanel()">Close</button>
+    </div>
+    <p style="margin-top:10px;">💡 The form is pre-filled with the embedded config when you open this panel — values are only needed if you want to override them on this device.</p>
+  </div>
+
+  <div class="warn-banner" id="localWarn">⚠️ <b>Local mode:</b> Realtime Database not connected — data saves only on this device. Check internet, database URL and Realtime Database rules, or click <b>⚙️ Firebase Setup</b>.</div>
 
   <div class="stats">
     <div class="stat white"><div class="num" id="totalCount">60</div><div class="label">Total</div></div>
@@ -201,6 +299,22 @@
     <button class="btn btn-all-no" onclick="markAll('no')">✕ All No</button>
     <button class="btn btn-fixall" onclick="fixAll()">🔒 Fix All</button>
     <button class="btn btn-fixall" onclick="unfixAll()">🔓 Unfix All</button>
+    <button class="btn btn-share" onclick="exportData()">📤 Export</button>
+    <button class="btn btn-share" onclick="document.getElementById('importFile').click()">📥 Import</button>
+    <button class="btn btn-share" onclick="toggleSharePanel()">🔗 Share Code</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importFile(event)">
+  </div>
+
+  <div class="share-panel" id="sharePanel">
+    <h3>🔗 Share / Sync Data Between Devices</h3>
+    <p><b>To send to another device:</b> Click <b>Generate Code</b> → Copy → Send on WhatsApp → Other person pastes here → <b>Import Code</b>.<br><b>Or</b> use <b>📤 Export</b> to download a file and send it, other person uses <b>📥 Import</b>.</p>
+    <textarea id="shareCode" placeholder="Your share code will appear here..."></textarea>
+    <div class="row">
+      <button class="btn btn-share" onclick="generateShareCode()">Generate Code</button>
+      <button class="btn btn-share" onclick="copyShareCode()">📋 Copy Code</button>
+      <button class="btn btn-add-confirm" onclick="importFromCode()">📥 Import Code</button>
+      <button class="btn btn-cancel" onclick="toggleSharePanel()">Close</button>
+    </div>
   </div>
 
   <div class="add-form" id="addForm">
@@ -228,257 +342,7 @@
   <div class="footer">🍽️ AIML Branch Lunch Planning • 23471A6101 – 23471A6152 &nbsp;|&nbsp; 24475A6101 – 24475A6108 (LE-1 to LE-8)<br>📌 Fix locks YES/NO & Paid — unfix to change &nbsp;•&nbsp; ➕ Add / 🗑️ Remove members anytime</div>
 </div>
 
-<script>
-  const baseRolls = [];
-  for (let i = 1; i <= 52; i++) baseRolls.push('23471A61' + String(i).padStart(2, '0'));
-  for (let i = 1; i <= 8; i++) baseRolls.push('24475A61' + String(i).padStart(2, '0'));
+<script src="firebase.js"></script>
 
-  let state = JSON.parse(localStorage.getItem('aiml_state') || '{}');
-  let payState = JSON.parse(localStorage.getItem('aiml_pay_state') || '{}');
-  let fixedState = JSON.parse(localStorage.getItem('aiml_fixed_state') || '{}');
-  let customRolls = JSON.parse(localStorage.getItem('aiml_custom_rolls') || '[]');
-  let removedRolls = JSON.parse(localStorage.getItem('aiml_removed_rolls') || '[]');
-  let amountPerPerson = parseFloat(localStorage.getItem('aiml_amount') || '0') || 0;
-  let currentFilter = 'all';
-  let searchQuery = '';
-
-  const grid = document.getElementById('grid');
-  const amountInput = document.getElementById('amountInput');
-  amountInput.value = amountPerPerson || '';
-
-  function getActiveRolls(){
-    const base = baseRolls.filter(r => !removedRolls.includes(r));
-    const custom = customRolls.filter(r => !removedRolls.includes(r));
-    return [...base, ...custom];
-  }
-  function saveState(){ localStorage.setItem('aiml_state', JSON.stringify(state)); }
-  function savePayState(){ localStorage.setItem('aiml_pay_state', JSON.stringify(payState)); }
-  function saveFixedState(){ localStorage.setItem('aiml_fixed_state', JSON.stringify(fixedState)); }
-  function saveCustom(){ localStorage.setItem('aiml_custom_rolls', JSON.stringify(customRolls)); }
-  function saveRemoved(){ localStorage.setItem('aiml_removed_rolls', JSON.stringify(removedRolls)); }
-
-  function toggleAddForm(){
-    const f = document.getElementById('addForm');
-    f.classList.toggle('open');
-    if (f.classList.contains('open')) document.getElementById('newRollInput').focus();
-  }
-
-  function addMember(){
-    const input = document.getElementById('newRollInput');
-    const roll = input.value.trim().toUpperCase();
-    if (!roll){ alert('Please enter a roll number'); return; }
-    const active = getActiveRolls();
-    if (active.includes(roll)){ alert(roll + ' already exists!'); return; }
-    // If it was previously removed, un-remove it
-    if (removedRolls.includes(roll)){
-      removedRolls = removedRolls.filter(r => r !== roll);
-      saveRemoved();
-    } else {
-      customRolls.push(roll);
-      saveCustom();
-    }
-    input.value = '';
-    document.getElementById('addForm').classList.remove('open');
-    render();
-    // scroll to new card
-    setTimeout(() => {
-      const cards = document.querySelectorAll('.card');
-      cards.forEach(c => { if (c.textContent.includes(roll)) c.scrollIntoView({behavior:'smooth', block:'center'}); });
-    }, 100);
-  }
-
-  document.getElementById('newRollInput').addEventListener('keydown', e => { if (e.key === 'Enter') addMember(); });
-
-  function removeMember(roll){
-    if (fixedState[roll]){ alert('🔒 This member is Fixed. Unfix first to remove.'); return; }
-    if (!confirm('Remove ' + roll + ' from the list?')) return;
-    if (customRolls.includes(roll)){
-      customRolls = customRolls.filter(r => r !== roll);
-      saveCustom();
-    } else {
-      if (!removedRolls.includes(roll)) removedRolls.push(roll);
-      saveRemoved();
-    }
-    delete state[roll]; delete payState[roll]; delete fixedState[roll];
-    saveState(); savePayState(); saveFixedState();
-    render();
-  }
-
-  function toggleFix(roll){
-    if (fixedState[roll]) delete fixedState[roll];
-    else fixedState[roll] = true;
-    saveFixedState();
-    render();
-  }
-
-  function fixAll(){
-    getActiveRolls().forEach(r => fixedState[r] = true);
-    saveFixedState(); render();
-  }
-  function unfixAll(){
-    fixedState = {}; saveFixedState(); render();
-  }
-
-  function render() {
-    const activeRolls = getActiveRolls();
-    grid.innerHTML = '';
-    let visible = 0;
-
-    activeRolls.forEach((roll, idx) => {
-      const status = state[roll] || '';
-      const pay = payState[roll] || '';
-      const isFixed = !!fixedState[roll];
-
-      if (currentFilter === 'yes' && status !== 'yes') return;
-      if (currentFilter === 'no' && status !== 'no') return;
-      if (currentFilter === 'pending' && status !== '') return;
-      if (currentFilter === 'paid' && pay !== 'paid') return;
-      if (currentFilter === 'notpaid' && pay !== 'notpaid') return;
-      if (currentFilter === 'fixed' && !isFixed) return;
-      if (searchQuery && !roll.toLowerCase().includes(searchQuery.toLowerCase())) return;
-
-      visible++;
-
-      const card = document.createElement('div');
-      let cls = 'card';
-      if (status === 'yes') cls += ' present';
-      if (status === 'no') cls += ' absent';
-      if (pay === 'paid') cls += ' is-paid';
-      if (pay === 'notpaid') cls += ' is-notpaid';
-      if (isFixed) cls += ' is-fixed';
-      card.className = cls;
-      card.style.animationDelay = (idx * 0.015) + 's';
-
-      const num = roll.slice(-2);
-      const isLE = roll.startsWith('24475A61');
-      const leLabel = isLE ? 'LE-' + parseInt(num, 10) : '';
-      const leBadge = isLE ? `<span class="le-badge">${leLabel}</span>` : '';
-      const fixedBadge = isFixed ? `<span class="fixed-badge">🔒 FIXED</span>` : '';
-
-      const baseSub = status === 'yes' ? '🍽️ Coming for Lunch' : status === 'no' ? '❌ Not Coming — tap YES to change' : 'Tap YES or NO';
-      const subText = isLE ? `${leLabel} • ${baseSub}` : `AIML • ${baseSub}`;
-      const payLabel = pay === 'paid' ? '<b>💰 Paid ✓</b>' : pay === 'notpaid' ? '⏳ Not Paid' : '💰 Money:';
-      const dis = isFixed ? 'disabled' : '';
-
-      card.innerHTML = `
-        <div class="status-icon">${status === 'yes' ? '✓' : status === 'no' ? '✕' : ''}</div>
-        <div class="card-top">
-          <div class="left">
-            <div class="avatar">${num}<span class="pay-dot">₹</span></div>
-            <div class="info">
-              <div class="roll">${roll}${leBadge}${fixedBadge}</div>
-              <div class="sub">${subText}</div>
-            </div>
-          </div>
-          <div class="actions">
-            <button class="yes-btn" ${dis} onclick="mark('${roll}', 'yes', this)" title="${isFixed ? '🔒 Fixed — unfix to change' : 'Yes - Coming for Lunch'}">YES</button>
-            <button class="no-btn" ${dis} onclick="mark('${roll}', 'no', this)" title="${isFixed ? '🔒 Fixed — unfix to change' : 'No - Not Coming'}">NO</button>
-          </div>
-        </div>
-        <div class="pay-row">
-          <div class="pay-label">${payLabel}</div>
-          <div class="pay-actions">
-            <button class="paid-btn" ${dis} onclick="markPay('${roll}', 'paid', this)" title="${isFixed ? '🔒 Fixed' : 'Money Paid'}">💰 Paid</button>
-            <button class="notpaid-btn" ${dis} onclick="markPay('${roll}', 'notpaid', this)" title="${isFixed ? '🔒 Fixed' : 'Money Not Paid'}">Not Paid</button>
-          </div>
-        </div>
-        <div class="lock-note">🔒 Fixed — click Fix button below to unlock & change</div>
-        <div class="bottom-row">
-          <button class="fix-btn" onclick="toggleFix('${roll}')" title="Fix / Unfix this member">${isFixed ? '🔓 Unfix (Unlock)' : '📌 Fix (Lock)'}</button>
-          <button class="remove-btn" ${dis} onclick="removeMember('${roll}')" title="${isFixed ? 'Unfix first to remove' : 'Remove this member'}">🗑️ Remove</button>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
-
-    if (visible === 0) grid.innerHTML = '<div class="empty">No members found 🔍</div>';
-    updateStats(activeRolls);
-  }
-
-  function floatEmoji(btn, emoji){
-    const rect = btn.getBoundingClientRect();
-    const el = document.createElement('div');
-    el.className = 'float-check'; el.textContent = emoji;
-    el.style.left = (rect.left + rect.width/2 - 14) + 'px';
-    el.style.top = (rect.top - 10) + 'px';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 1000);
-  }
-
-  function mark(roll, type, btn) {
-    if (fixedState[roll]) return;
-    if (state[roll] === type) delete state[roll]; else state[roll] = type;
-    saveState();
-    if (state[roll]) floatEmoji(btn, type === 'yes' ? '✅' : '❌');
-    render();
-  }
-
-  function markPay(roll, type, btn) {
-    if (fixedState[roll]) return;
-    if (payState[roll] === type) delete payState[roll]; else payState[roll] = type;
-    savePayState();
-    if (payState[roll]) floatEmoji(btn, type === 'paid' ? '💰' : '⏳');
-    render();
-  }
-
-  function markAll(type) {
-    getActiveRolls().forEach(r => { if (!fixedState[r]) state[r] = type; });
-    saveState(); render();
-  }
-
-  function setFilter(filter, btn) {
-    currentFilter = filter;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    render();
-  }
-
-  function updateStats(activeRolls) {
-    activeRolls = activeRolls || getActiveRolls();
-    const total = activeRolls.length;
-    const yes = activeRolls.filter(r => state[r] === 'yes').length;
-    const no = activeRolls.filter(r => state[r] === 'no').length;
-    const marked = yes + no;
-    const paid = activeRolls.filter(r => payState[r] === 'paid').length;
-    const notPaid = activeRolls.filter(r => payState[r] === 'notpaid').length;
-
-    document.getElementById('yesCount').textContent = yes;
-    document.getElementById('noCount').textContent = no;
-    document.getElementById('totalCount').textContent = total;
-    document.getElementById('paidCount').textContent = paid;
-    document.getElementById('notPaidCount').textContent = notPaid;
-    document.getElementById('headerTotal').textContent = total + ' Students';
-    document.getElementById('filterAll').textContent = 'All (' + total + ')';
-    document.getElementById('progressText').textContent = marked + ' / ' + total + ' responded';
-    document.getElementById('payProgressText').textContent = paid + ' / ' + total + ' paid';
-    document.getElementById('fillGreen').style.width = (total ? yes/total*100 : 0) + '%';
-    document.getElementById('fillRed').style.width = (total ? no/total*100 : 0) + '%';
-    document.getElementById('fillGold').style.width = (total ? paid/total*100 : 0) + '%';
-
-    const paidComing = activeRolls.filter(r => state[r] === 'yes' && payState[r] === 'paid').length;
-    const comingNotPaid = yes - paidComing;
-    const amtText = document.getElementById('amountText');
-    if (amountPerPerson > 0) {
-      const collected = paidComing * amountPerPerson;
-      const pending = comingNotPaid * amountPerPerson;
-      const totalNeeded = yes * amountPerPerson;
-      amtText.innerHTML = `Collected: ₹${collected.toLocaleString('en-IN')}<br>Pending: ₹${pending.toLocaleString('en-IN')} (${comingNotPaid} left)<br>Total for ${yes} coming: ₹${totalNeeded.toLocaleString('en-IN')}`;
-    } else {
-      amtText.innerHTML = 'Enter amount →<br>to see total';
-    }
-  }
-
-  amountInput.addEventListener('input', function(){
-    amountPerPerson = parseFloat(this.value) || 0;
-    localStorage.setItem('aiml_amount', amountPerPerson);
-    updateStats();
-  });
-
-  document.getElementById('searchInput').addEventListener('input', function() {
-    searchQuery = this.value.trim(); render();
-  });
-
-  render();
-</script>
 </body>
 </html>
