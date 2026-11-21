@@ -28,21 +28,22 @@ const baseRolls = [];
   function saveRemoved(){ pushToFirebase(); }
   function requireLiveConnection(){
     if (isFirebaseConnected && fbDocRef) return true;
-    alert('Not connected to Firebase Realtime Database. Enter the database URL in Firebase Setup and wait for the green Connected status before making changes. Nothing was saved.');
+    alert('Live Firebase is not connected. No change was saved. The organizer must configure the database URL in firebase.js and confirm the Realtime Database rules.');
     return false;
   }
 
   /* ===== FIREBASE SYNC ===== */
-  // 🔥 Embedded Firebase config (aiml-58d47) — file works out of the box, no manual setup needed on each device
+  // 🔥 Project config is centralized here. Organizer: put the exact Database URL from Firebase Console below once.
+  // Share/host this same JS file; classmates do not enter URLs or sign in individually.
   const DEFAULT_FIREBASE_CONFIG = {
     apiKey: "AIzaSyD0jH-ya_lE2Y8ASUvJlUcpyPVdL6nHQnk",
     authDomain: "aiml-58d47.firebaseapp.com",
     projectId: "aiml-58d47",
     storageBucket: "aiml-58d47.firebasestorage.app",
     messagingSenderId: "1028164423927",
-      appId: "1:1028164423927:web:fc4d3d0a738cabd89a43f2",
+    appId: "1:1028164423927:web:fc4d3d0a738cabd89a43f2",
     measurementId: "G-TBQBH5X4YV",
-    databaseURL: ""
+    databaseURL: "https://aiml-58d47-default-rtdb.firebaseio.com"
   };
   const DEFAULT_ROOM = "AIML-LUNCH-2026"; // Same room for everyone → change this in one place if you want a private code
 
@@ -50,16 +51,8 @@ const baseRolls = [];
   let isFirebaseConnected = false, isApplyingRemote = false;
   let fbSaveTimer = null;
 
-  function getSavedFirebaseConfig(){
-    try {
-      const saved = JSON.parse(localStorage.getItem('firebase_config') || 'null');
-      if (saved && saved.apiKey) return saved;
-    } catch(e){}
-    return DEFAULT_FIREBASE_CONFIG;
-  }
-  function getSavedRoom(){
-    return localStorage.getItem('firebase_room') || DEFAULT_ROOM || '';
-  }
+  function getSavedFirebaseConfig(){ return DEFAULT_FIREBASE_CONFIG; }
+  function getSavedRoom(){ return DEFAULT_ROOM; }
 
   function updateSyncUI(){
     const dot = document.getElementById('syncDot');
@@ -74,59 +67,20 @@ const baseRolls = [];
       if (warn) warn.style.display = 'none';
     } else {
       dot.classList.remove('online');
-      txt.textContent = '🔴 Local Only — Firebase not connected';
-      if (warn) warn.style.display = 'block';
+      const needsUrl = !DEFAULT_FIREBASE_CONFIG.databaseURL || DEFAULT_FIREBASE_CONFIG.databaseURL.includes('PASTE_EXACT');
+      txt.textContent = needsUrl ? '⚠️ Organizer must set database URL in firebase.js' : '🔴 Connecting to Firebase Realtime Database…';
+      if (warn) { warn.style.display = 'block'; warn.innerHTML = needsUrl
+        ? '⚠️ <b>Organizer setup required once:</b> put the exact Realtime Database URL in <code>firebase.js</code>, then publish the public room rules. Members do not enter URLs or sign in.'
+        : '⚠️ <b>Connecting:</b> changes stay disabled until the status turns green. Check the Realtime Database URL and Rules if connection fails.'; }
     }
-  }
-
-  function toggleFirebasePanel(){
-    const p = document.getElementById('firebasePanel');
-    p.classList.toggle('open');
-    if (p.classList.contains('open')){
-      const cfg = getSavedFirebaseConfig() || {};
-      document.getElementById('fb_apiKey').value = cfg.apiKey || '';
-      document.getElementById('fb_authDomain').value = cfg.authDomain || '';
-      document.getElementById('fb_projectId').value = cfg.projectId || '';
-      document.getElementById('fb_storageBucket').value = cfg.storageBucket || '';
-      document.getElementById('fb_messagingSenderId').value = cfg.messagingSenderId || '';
-      document.getElementById('fb_appId').value = cfg.appId || '';
-      document.getElementById('fb_databaseURL').value = cfg.databaseURL || '';
-      document.getElementById('fb_room').value = getSavedRoom() || '';
-    }
-  }
-
-  function saveFirebaseConfig(){
-    const cfg = {
-      apiKey: document.getElementById('fb_apiKey').value.trim(),
-      authDomain: document.getElementById('fb_authDomain').value.trim(),
-      projectId: document.getElementById('fb_projectId').value.trim(),
-      storageBucket: document.getElementById('fb_storageBucket').value.trim(),
-      messagingSenderId: document.getElementById('fb_messagingSenderId').value.trim(),
-      appId: document.getElementById('fb_appId').value.trim(),
-      databaseURL: document.getElementById('fb_databaseURL').value.trim().replace(/\/$/, '')
-    };
-    const room = document.getElementById('fb_room').value.trim().toUpperCase().replace(/\s+/g,'-');
-    if (!cfg.apiKey || !cfg.projectId || !cfg.appId){ alert('Firebase app config is incomplete'); return; }
-    if (!cfg.databaseURL || !/^https:\/\//i.test(cfg.databaseURL)){ alert('Paste the exact Realtime Database URL from Firebase Console'); return; }
-    if (!room){ alert('Please enter a Room Code (e.g. AIML-LUNCH-2026) — same for all devices'); return; }
-    localStorage.setItem('firebase_config', JSON.stringify(cfg));
-    localStorage.setItem('firebase_room', room);
-    initFirebase(true);
-  }
-
-  function disconnectFirebase(){
-    if (fbUnsubscribe) fbUnsubscribe();
-    isFirebaseConnected = false; fbDb = null; fbDocRef = null;
-    updateSyncUI();
-    alert('Disconnected. Now in Local Only mode.');
   }
 
   function initFirebase(fromUser){
     const cfg = getSavedFirebaseConfig();
     const room = getSavedRoom();
-    if (!cfg || !room || !cfg.databaseURL){
+    if (!cfg || !room || !cfg.databaseURL || cfg.databaseURL.includes('PASTE_EXACT')){
       updateSyncUI();
-      if (fromUser) alert('Paste the Realtime Database URL from Firebase Console, then Save & Connect.');
+      if (fromUser) alert('The organizer must set the exact Realtime Database URL in firebase.js.');
       return;
     }
     if (typeof firebase === 'undefined' || !firebase.database){
